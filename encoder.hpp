@@ -36,7 +36,7 @@ private:
   uint16_t ppr_;
   float dt_;
 
-  int16_t count_ = 0;
+  int64_t count_ = 0;
   float rps_;
   float position_;
 };
