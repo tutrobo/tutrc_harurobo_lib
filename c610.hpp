@@ -35,7 +35,7 @@ public:
 
   int16_t get_rpm(ID id) { return rpm_[to_underlying(id)]; }
 
-  float get_rps(ID id) { return get_rpm(id) / 60; }
+  float get_rps(ID id) { return get_rpm(id) / 60.0f; }
 
   // -10000 ~ 10000 mA の間で指定
   void set_current(ID id, int16_t current) {
@@ -53,7 +53,7 @@ public:
       data[i * 2] = current_[i + 4] >> 8;
       data[i * 2 + 1] = current_[i + 4];
     }
-    can_.transmit(0x200, data.data(), data.size());
+    can_.transmit(0x1FF, data.data(), data.size());
   }
 
 private:
