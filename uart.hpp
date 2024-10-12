@@ -25,6 +25,8 @@ public:
     return (buf_.size() + write_idx - read_idx_) % buf_.size();
   }
 
+  void flush() { read_idx_ = (read_idx_ + available()) % buf_.size(); }
+
   HAL_StatusTypeDef transmit(uint8_t *data, size_t size) {
     return HAL_UART_Transmit(huart_, data, size, HAL_MAX_DELAY);
   }
