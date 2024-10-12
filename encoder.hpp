@@ -10,8 +10,8 @@ namespace tutrc_harurobo_lib {
 
 class Encoder {
 public:
-  Encoder(TIM_HandleTypeDef *htim, uint16_t ppr, float dt)
-      : htim_(htim), ppr_(ppr), dt_(dt) {
+  Encoder(TIM_HandleTypeDef *htim, uint16_t ppr, float period)
+      : htim_(htim), ppr_(ppr), period_(period) {
     HAL_TIM_Encoder_Start(htim_, TIM_CHANNEL_ALL);
   }
 
@@ -21,7 +21,7 @@ public:
 
     float cpr = ppr_ * 4;
     count_ += delta;
-    rps_ = delta / dt_ / cpr;
+    rps_ = delta / period_ / cpr;
     position_ = count_ / cpr;
   }
 
@@ -34,7 +34,7 @@ public:
 private:
   TIM_HandleTypeDef *htim_;
   uint16_t ppr_;
-  float dt_;
+  float period_;
 
   int64_t count_ = 0;
   float rps_;
