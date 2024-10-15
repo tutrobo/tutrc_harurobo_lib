@@ -43,6 +43,8 @@ public:
   }
 
   void update() {
+    keys_prev_ = keys_;
+
     uint8_t checksum = 0;
 
     for (size_t i = 0; i < 8; ++i) {
