@@ -11,14 +11,8 @@ public:
   BNO055(UART &uart) : uart_(uart) {
     int start = HAL_GetTick();
     while (HAL_GetTick() - start < 500) {
-      uint8_t data = 0x00;
-      if (!write(0x3D, &data, 1)) {
-        continue;
-      }
-      data = 0x08;
-      if (!write(0x3D, &data, 1)) {
-        continue;
-      }
+      uint8_t data = 0x08;
+      write(0x3D, &data, 1);
     }
   }
 

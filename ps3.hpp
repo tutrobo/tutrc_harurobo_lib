@@ -62,7 +62,7 @@ public:
           }
 
           for (size_t j = 0; j < 4; ++j) {
-            axes_[j] = ((float)buf_[(j + 3) % 8] - 64) / 64;
+            axes_[j] = ((float)buf_[(i + j + 3) % 8] - 64) / 64;
           }
         }
         return;
