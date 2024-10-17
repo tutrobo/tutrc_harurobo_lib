@@ -42,7 +42,7 @@ public:
     });
   }
 
-  int16_t get_rpm(ID id) { return rpm_[to_underlying(id)]; }
+  float get_rpm(ID id) { return rpm_[to_underlying(id)]; }
 
   float get_rps(ID id) { return get_rpm(id) / 60.0f; }
 
