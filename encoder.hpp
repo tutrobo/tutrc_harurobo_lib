@@ -22,14 +22,14 @@ public:
     float cpr = ppr_ * 4;
     count_ += delta;
     rps_ = delta / period_ / cpr;
-    position_ = count_ / cpr;
+    rotation_ = count_ / cpr;
   }
 
   float get_rps() { return rps_; }
 
   float get_rpm() { return get_rps() * 60; }
 
-  float get_position() { return position_; }
+  float get_rotation() { return rotation_; }
 
 private:
   TIM_HandleTypeDef *htim_;
@@ -38,7 +38,7 @@ private:
 
   int64_t count_ = 0;
   float rps_;
-  float position_;
+  float rotation_;
 };
 
 } // namespace tutrc_harurobo_lib

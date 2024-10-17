@@ -27,6 +27,15 @@ public:
       for (size_t i = 0; i < 8; ++i) {
         if (id == 0x201 + i) {
           rpm_[i] = static_cast<int16_t>(data[2] << 8 | data[3]);
+          int16_t angle = static_cast<int16_t>(data[0] << 8 | data[1]);
+          int16_t delta = angle - prev_angle_[i];
+          if (delta > 4096) {
+            delta -= 8192;
+          } else if (delta < -4096) {
+            delta += 8192;
+          }
+          rotation_[i] += delta;
+          prev_angle_[i] = angle;
           break;
         }
       }
@@ -36,6 +45,8 @@ public:
   int16_t get_rpm(ID id) { return rpm_[to_underlying(id)]; }
 
   float get_rps(ID id) { return get_rpm(id) / 60.0f; }
+
+  float get_rotation(ID id) { return rotation_[to_underlying(id)] / 8192.0f; }
 
   // -10000 ~ 10000 mA の間で指定
   void set_current(ID id, int16_t current) {
@@ -59,6 +70,8 @@ public:
 private:
   CAN &can_;
   std::array<int16_t, 8> rpm_ = {};
+  std::array<int16_t, 8> prev_angle_ = {};
+  std::array<int64_t, 8> rotation_ = {};
   std::array<int16_t, 8> current_ = {};
 };
 
