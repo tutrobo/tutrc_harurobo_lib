@@ -16,7 +16,7 @@ public:
   CAN(CAN_HandleTypeDef *hcan, uint32_t filter_id = 0, uint32_t filter_mask = 0)
       : hcan_(hcan) {
     if (hcan_->State == HAL_CAN_STATE_READY) {
-      CAN_FilterTypeDef filter;
+      CAN_FilterTypeDef filter = {};
       filter.FilterIdHigh = filter_id << 5;
       filter.FilterIdLow = filter_id << 21;
       filter.FilterMaskIdHigh = filter_mask << 5;
@@ -49,7 +49,7 @@ public:
   }
 
   HAL_StatusTypeDef transmit(uint32_t id, uint8_t *data, size_t size) {
-    CAN_TxHeaderTypeDef tx_header;
+    CAN_TxHeaderTypeDef tx_header = {};
     tx_header.StdId = id;
     tx_header.IDE = CAN_ID_STD;
     tx_header.RTR = CAN_RTR_DATA;
@@ -92,7 +92,7 @@ public:
       uint32_t filter_mask = 0)
       : hfdcan_(hfdcan) {
     if (hfdcan_->State == HAL_FDCAN_STATE_READY) {
-      FDCAN_FilterTypeDef filter;
+      FDCAN_FilterTypeDef filter = {};
       filter.IdType = FDCAN_STANDARD_ID;
       filter.FilterIndex = 0;
       filter.FilterType = FDCAN_FILTER_MASK;
@@ -122,11 +122,39 @@ public:
   }
 
   HAL_StatusTypeDef transmit(uint32_t id, uint8_t *data, size_t size) {
-    FDCAN_TxHeaderTypeDef tx_header;
+    FDCAN_TxHeaderTypeDef tx_header = {};
     tx_header.Identifier = id;
     tx_header.IdType = FDCAN_STANDARD_ID;
     tx_header.TxFrameType = FDCAN_DATA_FRAME;
-    tx_header.DataLength = (size > 8 ? 8 : size) << 16;
+    switch (size) {
+    case 0:
+      tx_header.DataLength = FDCAN_DLC_BYTES_0;
+      break;
+    case 1:
+      tx_header.DataLength = FDCAN_DLC_BYTES_1;
+      break;
+    case 2:
+      tx_header.DataLength = FDCAN_DLC_BYTES_2;
+      break;
+    case 3:
+      tx_header.DataLength = FDCAN_DLC_BYTES_3;
+      break;
+    case 4:
+      tx_header.DataLength = FDCAN_DLC_BYTES_4;
+      break;
+    case 5:
+      tx_header.DataLength = FDCAN_DLC_BYTES_5;
+      break;
+    case 6:
+      tx_header.DataLength = FDCAN_DLC_BYTES_6;
+      break;
+    case 7:
+      tx_header.DataLength = FDCAN_DLC_BYTES_7;
+      break;
+    default:
+      tx_header.DataLength = FDCAN_DLC_BYTES_8;
+      break;
+    }
     tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
     tx_header.BitRateSwitch = FDCAN_BRS_OFF;
     tx_header.FDFormat = FDCAN_CLASSIC_CAN;

@@ -38,8 +38,37 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
       HAL_OK) {
     auto itr = tutrc_harurobo_lib::CAN::rx_callbacks_.find(hfdcan);
     if (itr != tutrc_harurobo_lib::CAN::rx_callbacks_.end()) {
-      itr->second(rx_header.Identifier, data.data(),
-                  rx_header.DataLength >> 16);
+      size_t size;
+      switch (rx_header.DataLength) {
+      case FDCAN_DLC_BYTES_0:
+        size = 0;
+        break;
+      case FDCAN_DLC_BYTES_1:
+        size = 1;
+        break;
+      case FDCAN_DLC_BYTES_2:
+        size = 2;
+        break;
+      case FDCAN_DLC_BYTES_3:
+        size = 3;
+        break;
+      case FDCAN_DLC_BYTES_4:
+        size = 4;
+        break;
+      case FDCAN_DLC_BYTES_5:
+        size = 5;
+        break;
+      case FDCAN_DLC_BYTES_6:
+        size = 6;
+        break;
+      case FDCAN_DLC_BYTES_7:
+        size = 7;
+        break;
+      default:
+        size = 8;
+        break;
+      }
+      itr->second(rx_header.Identifier, data.data(), size);
     }
   }
 }
