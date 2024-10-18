@@ -34,7 +34,7 @@ public:
           } else if (delta < -4096) {
             delta += 8192;
           }
-          rotation_[i] += delta;
+          position_[i] += delta;
           prev_angle_[i] = angle;
           break;
         }
@@ -46,7 +46,7 @@ public:
 
   float get_rps(ID id) { return get_rpm(id) / 60.0f; }
 
-  float get_rotation(ID id) { return rotation_[to_underlying(id)] / 8192.0f; }
+  float get_position(ID id) { return position_[to_underlying(id)] / 8192.0f; }
 
   // -10000 ~ 10000 mA の間で指定
   void set_current(ID id, int16_t current) {
@@ -71,7 +71,7 @@ private:
   CAN &can_;
   std::array<int16_t, 8> rpm_ = {};
   std::array<int16_t, 8> prev_angle_ = {};
-  std::array<int64_t, 8> rotation_ = {};
+  std::array<int64_t, 8> position_ = {};
   std::array<int16_t, 8> current_ = {};
 };
 
