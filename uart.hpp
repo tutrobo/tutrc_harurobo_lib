@@ -38,14 +38,6 @@ public:
     }
   }
 
-  template <class... Args>
-  HAL_StatusTypeDef printf(const char *fmt, Args &&...args) {
-    size_t len = std::snprintf(nullptr, 0, fmt, args...);
-    std::vector<uint8_t> data(len + 1);
-    std::snprintf(reinterpret_cast<char *>(data.data()), len + 1, fmt, args...);
-    return transmit(data.data(), len);
-  }
-
 private:
   UART_HandleTypeDef *huart_;
   std::vector<uint8_t> buf_;
