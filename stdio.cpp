@@ -2,13 +2,15 @@
 
 #ifdef HAL_UART_MODULE_ENABLED
 
-static inline UART_HandleTypeDef *huart_stdin = nullptr;
+static UART_HandleTypeDef *huart_printf = nullptr;
 
-void enable_stdin(UART_HandleTypeDef *huart) { huart_stdin = huart; }
+void tutrc_harurobo_lib::enable_printf(UART_HandleTypeDef *huart) {
+  huart_printf = huart;
+}
 
 extern "C" int _write(int, char *ptr, int len) {
-  if (huart_stdin) {
-    HAL_UART_Transmit(huart_stdin, (uint8_t *)ptr, len, HAL_MAX_DELAY);
+  if (huart_printf) {
+    HAL_UART_Transmit(huart_printf, (uint8_t *)ptr, len, HAL_MAX_DELAY);
   }
   return len;
 }

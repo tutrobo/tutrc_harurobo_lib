@@ -8,7 +8,7 @@
 
 namespace tutrc_harurobo_lib {
 
-void enable_stdin(UART_HandleTypeDef *huart);
+void enable_printf(UART_HandleTypeDef *huart);
 
 }
 
