@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include "cmsis_os2.h"
+
 #include "uart.hpp"
 
 namespace tutrc_harurobo_lib {
