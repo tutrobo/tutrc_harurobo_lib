@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "FreeRTOS.h"
-#include "cmsis_os2.h"
 #include "queue.h"
 #include "task.h"
 
@@ -32,7 +31,7 @@ public:
     if (HAL_UART_Transmit_DMA(huart_, data, size) != HAL_OK) {
       return false;
     }
-    ulTaskNotifyTake(pdTRUE, osWaitForever);
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
     return true;
   }
 
