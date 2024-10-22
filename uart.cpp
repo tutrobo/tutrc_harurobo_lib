@@ -11,7 +11,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
   if (itr != tutrc_harurobo_lib::UART::instances_.end()) {
     tutrc_harurobo_lib::UART *uart = itr->second;
     BaseType_t yield = pdFALSE;
-    xTaskNotifyFromISR(uart->task_handle_, 0, eNoAction, &yield);
+    vTaskNotifyGiveFromISR(uart->task_handle_, &yield);
     portYIELD_FROM_ISR(yield);
   }
 }
@@ -21,8 +21,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (itr != tutrc_harurobo_lib::UART::instances_.end()) {
     tutrc_harurobo_lib::UART *uart = itr->second;
     BaseType_t yield = pdFALSE;
-    xTaskNotifyFromISR(uart->task_handle_, Size, eSetValueWithOverwrite,
-                       &yield);
+    xQueueOverwriteFromISR(uart->rx_notify_, &Size, &yield);
     portYIELD_FROM_ISR(yield);
   }
 }

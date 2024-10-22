@@ -11,6 +11,7 @@
 
 #include "FreeRTOS.h"
 #include "cmsis_os2.h"
+#include "queue.h"
 #include "task.h"
 
 extern "C" int _write(int file, char *ptr, int len);
@@ -23,6 +24,7 @@ public:
       : huart_(huart), rx_buf_(queue_size) {
     instances_[huart_] = this;
     task_handle_ = xTaskGetCurrentTaskHandle();
+    rx_notify_ = xQueueCreate(1, sizeof(uint16_t));
     HAL_UARTEx_ReceiveToIdle_DMA(huart_, rx_buf_.data(), rx_buf_.size());
   }
 
@@ -30,12 +32,7 @@ public:
     if (HAL_UART_Transmit_DMA(huart_, data, size) != HAL_OK) {
       return false;
     }
-    while (huart_->gState != HAL_UART_STATE_READY) {
-      uint32_t rx_write_idx;
-      if (xTaskNotifyWait(0, 0, &rx_write_idx, osWaitForever) == osOK) {
-        rx_write_idx_ = rx_write_idx;
-      }
-    }
+    ulTaskNotifyTake(pdTRUE, osWaitForever);
     return true;
   }
 
@@ -43,8 +40,8 @@ public:
     TimeOut_t timeout_state;
     vTaskSetTimeOutState(&timeout_state);
     while (rx_buf_count() < size) {
-      uint32_t rx_write_idx;
-      if (xTaskNotifyWait(0, 0, &rx_write_idx, timeout) == osOK) {
+      uint16_t rx_write_idx;
+      if (xQueueReceive(rx_notify_, &rx_write_idx, timeout) == pdTRUE) {
         rx_write_idx_ = rx_write_idx;
       }
       if (xTaskCheckForTimeOut(&timeout_state, &timeout) != pdFALSE) {
@@ -70,9 +67,10 @@ public:
 private:
   UART_HandleTypeDef *huart_;
   TaskHandle_t task_handle_;
+  QueueHandle_t rx_notify_;
   std::vector<uint8_t> rx_buf_;
-  uint32_t rx_read_idx_ = 0;
-  uint32_t rx_write_idx_ = 0;
+  uint16_t rx_read_idx_ = 0;
+  uint16_t rx_write_idx_ = 0;
 
   size_t rx_buf_count() {
     return (rx_buf_.size() + rx_write_idx_ - rx_read_idx_) % rx_buf_.size();
