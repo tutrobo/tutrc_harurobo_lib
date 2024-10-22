@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "uart.hpp"
 #include "utility.hpp"
 
 namespace tutrc_harurobo_lib {
@@ -38,14 +39,25 @@ public:
     SELECT,
   };
 
-  PS3(UART_HandleTypeDef *huart) : huart_(huart) {
-    HAL_UART_Receive_DMA(huart_, buf_.data(), buf_.size());
-  }
+  PS3(UART *uart) : uart_(uart) {}
 
   void update() {
     keys_prev_ = keys_;
 
     uint8_t checksum = 0;
+
+    if (!uart_->receive(buf_.data(), buf_.size(), 0)) {
+      return;
+    }
+    // 1周分受信
+    for (size_t i = 0; i < 8; ++i) {
+      if (buf_[i] == 0x80) {
+        if (!uart_->receive(buf_.data(), i, 0)) {
+          return;
+        }
+        break;
+      }
+    }
 
     for (size_t i = 0; i < 8; ++i) {
       if (buf_[i] == 0x80) {
@@ -85,7 +97,7 @@ public:
   }
 
 private:
-  UART_HandleTypeDef *huart_;
+  UART *uart_;
   std::array<uint8_t, 8> buf_ = {};
   std::array<float, 4> axes_ = {};
   uint16_t keys_;
