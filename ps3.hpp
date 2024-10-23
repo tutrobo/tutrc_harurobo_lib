@@ -50,7 +50,7 @@ public:
       return;
     }
     // 1周分受信
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 1; i < 8; ++i) {
       if (buf_[i] == 0x80) {
         if (!uart_->receive(buf_.data(), i, 0)) {
           return;
