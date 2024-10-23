@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-#ifdef HAL_UART_MODULE_ENABLED
+#ifndef HAL_UART_MODULE_ENABLED
 
 #include <cstddef>
 #include <cstdint>
@@ -21,8 +21,8 @@ namespace tutrc_harurobo_lib {
 
 class UART {
 public:
-  UART(UART_HandleTypeDef *huart, size_t queue_size = 64)
-      : huart_(huart), rx_buf_(queue_size) {
+  UART(UART_HandleTypeDef *huart, size_t rx_buf_size = 64)
+      : huart_(huart), rx_buf_(rx_buf_size) {
     instances_[huart_] = this;
     tx_mutex_ = osMutexNew(nullptr);
     rx_mutex_ = osMutexNew(nullptr);
