@@ -10,9 +10,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
   auto itr = tutrc_harurobo_lib::UART::instances_.find(huart);
   if (itr != tutrc_harurobo_lib::UART::instances_.end()) {
     tutrc_harurobo_lib::UART *uart = itr->second;
-    BaseType_t yield = pdFALSE;
-    vTaskNotifyGiveFromISR(uart->task_handle_, &yield);
-    portYIELD_FROM_ISR(yield);
+    osSemaphoreRelease(uart->tx_sem_);
   }
 }
 
@@ -21,7 +19,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if (itr != tutrc_harurobo_lib::UART::instances_.end()) {
     tutrc_harurobo_lib::UART *uart = itr->second;
     BaseType_t yield = pdFALSE;
-    xQueueOverwriteFromISR(uart->rx_notify_, &Size, &yield);
+    xQueueOverwriteFromISR(uart->rx_queue_, &Size, &yield);
     portYIELD_FROM_ISR(yield);
   }
 }
@@ -40,8 +38,8 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 
 int _write(int, char *ptr, int len) {
   if (tutrc_harurobo_lib::UART::uart_printf_) {
-    HAL_UART_Transmit_DMA(tutrc_harurobo_lib::UART::uart_printf_->huart_,
-                          reinterpret_cast<uint8_t *>(ptr), len);
+    tutrc_harurobo_lib::UART::uart_printf_->transmit(
+        reinterpret_cast<uint8_t *>(ptr), len);
   }
   return len;
 }

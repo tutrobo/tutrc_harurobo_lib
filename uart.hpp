@@ -10,8 +10,10 @@
 #include <vector>
 
 #include "FreeRTOS.h"
+#include "cmsis_os2.h"
 #include "queue.h"
-#include "task.h"
+
+#include "utility.hpp"
 
 extern "C" int _write(int file, char *ptr, int len);
 
@@ -22,31 +24,51 @@ public:
   UART(UART_HandleTypeDef *huart, size_t queue_size = 64)
       : huart_(huart), rx_buf_(queue_size) {
     instances_[huart_] = this;
-    task_handle_ = xTaskGetCurrentTaskHandle();
-    rx_notify_ = xQueueCreate(1, sizeof(uint16_t));
+    tx_mutex_ = osMutexNew(nullptr);
+    rx_mutex_ = osMutexNew(nullptr);
+    tx_sem_ = osSemaphoreNew(1, 0, nullptr);
+    rx_queue_ = xQueueCreate(1, sizeof(uint16_t));
     HAL_UARTEx_ReceiveToIdle_DMA(huart_, rx_buf_.data(), rx_buf_.size());
   }
 
   bool transmit(uint8_t *data, size_t size) {
+    ScopedLock lock(tx_mutex_);
+    if (!lock.lock(osWaitForever)) {
+      return false;
+    }
     if (HAL_UART_Transmit_DMA(huart_, data, size) != HAL_OK) {
       return false;
     }
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-    return true;
+    return osSemaphoreAcquire(tx_sem_, osWaitForever) == osOK;
   }
 
   bool receive(uint8_t *data, size_t size, uint32_t timeout) {
-    TimeOut_t timeout_state;
-    vTaskSetTimeOutState(&timeout_state);
-    while (rx_buf_count() < size) {
+    ScopedLock lock(rx_mutex_);
+    if (timeout == 0) {
+      if (!lock.lock(timeout)) {
+        return false;
+      }
       uint16_t rx_write_idx;
-      if (xQueueReceive(rx_notify_, &rx_write_idx, timeout) == pdTRUE) {
+      if (xQueueReceive(rx_queue_, &rx_write_idx, timeout) == pdTRUE) {
         rx_write_idx_ = rx_write_idx;
       }
-      if (xTaskCheckForTimeOut(&timeout_state, &timeout) != pdFALSE) {
-        break;
+    } else {
+      TimeOut_t timeout_state;
+      vTaskSetTimeOutState(&timeout_state);
+      if (!lock.lock(timeout)) {
+        return false;
+      }
+      while (rx_buf_count() < size) {
+        if (xTaskCheckForTimeOut(&timeout_state, &timeout) != pdFALSE) {
+          break;
+        }
+        uint16_t rx_write_idx;
+        if (xQueueReceive(rx_queue_, &rx_write_idx, timeout) == pdTRUE) {
+          rx_write_idx_ = rx_write_idx;
+        }
       }
     }
+
     if (rx_buf_count() < size) {
       return false;
     }
@@ -65,8 +87,10 @@ public:
 
 private:
   UART_HandleTypeDef *huart_;
-  TaskHandle_t task_handle_;
-  QueueHandle_t rx_notify_;
+  osMutexId_t tx_mutex_;
+  osMutexId_t rx_mutex_;
+  osSemaphoreId_t tx_sem_;
+  QueueHandle_t rx_queue_;
   std::vector<uint8_t> rx_buf_;
   uint16_t rx_read_idx_ = 0;
   uint16_t rx_write_idx_ = 0;
