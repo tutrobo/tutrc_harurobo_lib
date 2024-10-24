@@ -1,9 +1,6 @@
 #pragma once
 
-#include <algorithm>
 #include <type_traits>
-
-#include "cmsis_os2.h"
 
 namespace tutrc_harurobo_lib {
 
