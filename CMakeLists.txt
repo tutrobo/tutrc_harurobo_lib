@@ -16,3 +16,9 @@ target_sources(${PROJECT_NAME} INTERFACE
 target_include_directories(${PROJECT_NAME} INTERFACE
   include
 )
+
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+  set(DOXYGEN_OUTPUT_LANGUAGE Japanese)
+  doxygen_add_docs(docs)
+endif()
