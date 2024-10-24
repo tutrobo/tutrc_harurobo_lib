@@ -37,7 +37,7 @@ public:
   }
 
   bool transmit(uint8_t *data, size_t size) {
-    if (osMutexAcquire(rx_mutex_, osWaitForever) != osOK) {
+    if (osMutexAcquire(tx_mutex_, osWaitForever) != osOK) {
       return false;
     }
     if (HAL_UART_Transmit_DMA(huart_, data, size) != HAL_OK) {
