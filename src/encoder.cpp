@@ -1,4 +1,4 @@
-#include "../encoder.hpp"
+#include "tutrc_harurobo_lib/encoder.hpp"
 
 #ifdef HAL_TIM_MODULE_ENABLED
 

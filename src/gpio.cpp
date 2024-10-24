@@ -1,4 +1,4 @@
-#include "../gpio.hpp"
+#include "tutrc_harurobo_lib/gpio.hpp"
 
 #ifdef HAL_GPIO_MODULE_ENABLED
 

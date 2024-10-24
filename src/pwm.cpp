@@ -1,4 +1,4 @@
-#include "../pwm.hpp"
+#include "tutrc_harurobo_lib/pwm.hpp"
 
 #ifdef HAL_TIM_MODULE_ENABLED
 
