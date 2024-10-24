@@ -12,6 +12,7 @@
 #include "FreeRTOS.h"
 #include "cmsis_os2.h"
 #include "queue.h"
+#include "task.h"
 
 #include "utility.hpp"
 
