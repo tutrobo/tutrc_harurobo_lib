@@ -18,12 +18,46 @@ extern "C" int _write(int file, char *ptr, int len);
 
 namespace tutrc_harurobo_lib {
 
+/**
+ * UARTペリフェラルを扱うためのクラス
+ */
 class UART {
 public:
+  /**
+   * コンストラクタ
+   *
+   * @param huart STM32 HALのハンドル
+   * @param rx_buf_size 受信バッファサイズ
+   */
   UART(UART_HandleTypeDef *huart, size_t rx_buf_size = 64);
+
+  /**
+   * UART送信
+   *
+   * @param data 送信するバイト列の先頭ポインタ
+   * @param size 送信するバイト数
+   * @return 成功: true, 失敗: false
+   */
   bool transmit(uint8_t *data, size_t size);
+
+  /**
+   * UART受信
+   *
+   * @param data 受信したバイト列を格納するポインタ
+   * @param size 受信するバイト数
+   * @param timeout タイムアウトまでの時間(ms)
+   * @return 成功: true, 失敗: false
+   */
   bool receive(uint8_t *data, size_t size, uint32_t timeout);
+
+  /**
+   * 受信バッファをflush(空に)する
+   */
   void flush();
+
+  /**
+   * printf() を呼び出した際にこのペリフェラルを介して出力する
+   */
   void enable_printf();
 
 private:
