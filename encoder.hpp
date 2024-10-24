@@ -2,36 +2,17 @@
 
 #include "main.h"
 
-#ifdef HAL_TIM_MODULE_ENABLED
-
 #include <cstdint>
 
 namespace tutrc_harurobo_lib {
 
 class Encoder {
 public:
-  Encoder(TIM_HandleTypeDef *htim, uint16_t ppr, float period)
-      : htim_(htim), ppr_(ppr), period_(period) {
-    if (HAL_TIM_Encoder_Start(htim_, TIM_CHANNEL_ALL) != HAL_OK) {
-      Error_Handler();
-    }
-  }
-
-  void update() {
-    int16_t delta = __HAL_TIM_GET_COUNTER(htim_);
-    __HAL_TIM_SET_COUNTER(htim_, 0);
-
-    float cpr = ppr_ * 4;
-    count_ += delta;
-    rps_ = delta / period_ / cpr;
-    position_ = count_ / cpr;
-  }
-
-  float get_rps() { return rps_; }
-
-  float get_rpm() { return get_rps() * 60; }
-
-  float get_position() { return position_; }
+  Encoder(TIM_HandleTypeDef *htim, uint16_t ppr, float period);
+  void update();
+  float get_rps();
+  float get_rpm();
+  float get_position();
 
 private:
   TIM_HandleTypeDef *htim_;
@@ -44,5 +25,3 @@ private:
 };
 
 } // namespace tutrc_harurobo_lib
-
-#endif

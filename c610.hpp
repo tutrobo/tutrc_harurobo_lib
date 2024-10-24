@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "can.hpp"
+#include "can_base.hpp"
 #include "utility.hpp"
 
 namespace tutrc_harurobo_lib {
@@ -22,7 +22,7 @@ public:
     ID8,
   };
 
-  C610(CAN *can) : can_(can) {
+  C610(CANBase *can) : can_(can) {
     can_->set_rx_callback([this](uint32_t id, uint8_t *data, size_t size) {
       for (size_t i = 0; i < 8; ++i) {
         if (id == 0x201 + i) {
@@ -76,7 +76,7 @@ public:
   }
 
 private:
-  CAN *can_;
+  CANBase *can_;
 
   std::array<int16_t, 8> prev_angle_ = {};
   std::array<int64_t, 8> position_ = {};

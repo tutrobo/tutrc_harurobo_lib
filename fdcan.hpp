@@ -11,20 +11,21 @@
 
 namespace tutrc_harurobo_lib {
 
-class CAN : public CANBase {
+class FDCAN : public CANBase {
 public:
-  CAN(CAN_HandleTypeDef *hcan, uint32_t filter_id = 0,
-      uint32_t filter_mask = 0);
+  FDCAN(FDCAN_HandleTypeDef *hfdcan, uint32_t filter_id = 0,
+        uint32_t filter_mask = 0);
   bool transmit(uint32_t id, uint8_t *data, size_t size) override;
   void set_rx_callback(
       std::function<void(uint32_t, uint8_t *, size_t)> &&callback) override;
 
 private:
-  CAN_HandleTypeDef *hcan_;
+  FDCAN_HandleTypeDef *hfdcan_;
   std::function<void(uint32_t, uint8_t *, size_t)> rx_callback_;
 
-  static std::unordered_map<CAN_HandleTypeDef *, CAN *> instances_;
-  friend void ::HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
+  static std::unordered_map<FDCAN_HandleTypeDef *, FDCAN *> instances_;
+  friend void ::HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
+                                          uint32_t RxFifo0ITs);
 };
 
 } // namespace tutrc_harurobo_lib

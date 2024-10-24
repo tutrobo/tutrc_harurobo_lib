@@ -6,25 +6,15 @@
 #include <functional>
 #include <unordered_map>
 
-#ifdef HAL_GPIO_MODULE_ENABLED
-
 namespace tutrc_harurobo_lib {
 
 class GPIO {
 public:
-  GPIO(GPIO_TypeDef *port, uint16_t pin) : port_(port), pin_(pin) {
-    instances_[pin_] = this;
-  }
-
-  void write(GPIO_PinState state) { HAL_GPIO_WritePin(port_, pin_, state); }
-
-  void toggle() { HAL_GPIO_TogglePin(port_, pin_); }
-
-  GPIO_PinState read() { return HAL_GPIO_ReadPin(port_, pin_); }
-
-  void set_gpio_callback(std::function<void()> &&callback) {
-    gpio_callback_ = std::move(callback);
-  }
+  GPIO(GPIO_TypeDef *port, uint16_t pin);
+  void write(GPIO_PinState state);
+  void toggle();
+  GPIO_PinState read();
+  void set_gpio_callback(std::function<void()> &&callback);
 
 private:
   GPIO_TypeDef *port_;
@@ -36,5 +26,3 @@ private:
 };
 
 } // namespace tutrc_harurobo_lib
-
-#endif

@@ -2,8 +2,6 @@
 
 #include "main.h"
 
-#ifdef HAL_UART_MODULE_ENABLED
-
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -105,5 +103,3 @@ private:
 };
 
 } // namespace tutrc_harurobo_lib
-
-#endif
