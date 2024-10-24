@@ -20,5 +20,9 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
   set(DOXYGEN_OUTPUT_LANGUAGE Japanese)
-  doxygen_add_docs(docs)
+  set(DOXYGEN_USE_MDFILE_AS_MAINPAGE README.md)
+  doxygen_add_docs(docs
+    README.md
+    ${CMAKE_CURRENT_SOURCE_DIR}
+  )
 endif()
