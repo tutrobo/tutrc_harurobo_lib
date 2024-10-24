@@ -11,12 +11,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
   CAN_RxHeaderTypeDef rx_header;
   std::array<uint8_t, 8> data;
 
-  if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, data.data()) ==
-      HAL_OK) {
-    auto itr = tutrc_harurobo_lib::CAN::instances_.find(hcan);
-    if (itr != tutrc_harurobo_lib::CAN::instances_.end()) {
-      tutrc_harurobo_lib::CAN *can = itr->second;
-      if (can->rx_callback_) {
+  auto itr = tutrc_harurobo_lib::CAN::instances_.find(hcan);
+  if (itr != tutrc_harurobo_lib::CAN::instances_.end()) {
+    tutrc_harurobo_lib::CAN *can = itr->second;
+    if (can->rx_callback_) {
+      if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, data.data()) ==
+          HAL_OK) {
         can->rx_callback_(rx_header.StdId, data.data(), rx_header.DLC);
       }
     }
@@ -35,12 +35,12 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
   FDCAN_RxHeaderTypeDef rx_header;
   std::array<uint8_t, 8> data;
 
-  if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rx_header, data.data()) ==
-      HAL_OK) {
-    auto itr = tutrc_harurobo_lib::CAN::instances_.find(hfdcan);
-    if (itr != tutrc_harurobo_lib::CAN::instances_.end()) {
-      tutrc_harurobo_lib::CAN *can = itr->second;
-      if (can->rx_callback_) {
+  auto itr = tutrc_harurobo_lib::CAN::instances_.find(hfdcan);
+  if (itr != tutrc_harurobo_lib::CAN::instances_.end()) {
+    tutrc_harurobo_lib::CAN *can = itr->second;
+    if (can->rx_callback_) {
+      if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rx_header,
+                                 data.data()) == HAL_OK) {
         size_t size;
         switch (rx_header.DataLength) {
         case FDCAN_DLC_BYTES_0:

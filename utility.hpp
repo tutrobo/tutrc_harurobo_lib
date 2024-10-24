@@ -17,18 +17,10 @@ constexpr const T &clamp(const T &v, const T &low, const T &high) {
   return std::min(std::max(v, low), high);
 }
 
-class ScopedLock {
-public:
-  ScopedLock(osMutexId_t mutex) : mutex_(mutex) {}
-
-  ~ScopedLock() { osMutexRelease(mutex_); }
-
-  bool lock(uint32_t timeout = osWaitForever) {
-    return osMutexAcquire(mutex_, timeout) == osOK;
-  }
-
-private:
-  osMutexId_t mutex_;
-};
+template <class T, class U = T>
+osThreadId_t create_thread(void (*func)(T), U argument,
+                           const osThreadAttr_t &attr) {
+  return osThreadNew(reinterpret_cast<osThreadFunc_t>(func), argument, &attr);
+}
 
 } // namespace tutrc_harurobo_lib

@@ -29,8 +29,8 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
   if (itr != tutrc_harurobo_lib::UART::instances_.end()) {
     tutrc_harurobo_lib::UART *uart = itr->second;
     HAL_UART_Abort(huart);
-    uart->rx_read_idx_ = 0;
-    uart->rx_write_idx_ = 0;
+    uart->rx_buf_head_ = 0;
+    uart->rx_buf_tail_ = 0;
     HAL_UARTEx_ReceiveToIdle_DMA(huart, uart->rx_buf_.data(),
                                  uart->rx_buf_.size());
   }

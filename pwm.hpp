@@ -12,7 +12,9 @@ class PWM {
 public:
   PWM(TIM_HandleTypeDef *htim, uint32_t channel)
       : htim_(htim), channel_(channel) {
-    HAL_TIM_PWM_Start(htim_, channel_);
+    if (HAL_TIM_PWM_Start(htim_, channel_) != HAL_OK) {
+      Error_Handler();
+    }
   }
 
   uint32_t get_compare() { return __HAL_TIM_GET_COMPARE(htim_, channel_); }

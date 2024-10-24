@@ -29,34 +29,40 @@ public:
     rx_mutex_ = osMutexNew(nullptr);
     tx_sem_ = osSemaphoreNew(1, 0, nullptr);
     rx_queue_ = xQueueCreate(1, sizeof(uint16_t));
-    HAL_UARTEx_ReceiveToIdle_DMA(huart_, rx_buf_.data(), rx_buf_.size());
+
+    if (HAL_UARTEx_ReceiveToIdle_DMA(huart_, rx_buf_.data(), rx_buf_.size()) !=
+        HAL_OK) {
+      Error_Handler();
+    }
   }
 
   bool transmit(uint8_t *data, size_t size) {
-    ScopedLock lock(tx_mutex_);
-    if (!lock.lock(osWaitForever)) {
+    if (osMutexAcquire(rx_mutex_, osWaitForever) != osOK) {
       return false;
     }
     if (HAL_UART_Transmit_DMA(huart_, data, size) != HAL_OK) {
+      osMutexRelease(tx_mutex_);
       return false;
     }
-    return osSemaphoreAcquire(tx_sem_, osWaitForever) == osOK;
+    osSemaphoreAcquire(tx_sem_, osWaitForever);
+    osMutexRelease(tx_mutex_);
+    return true;
   }
 
   bool receive(uint8_t *data, size_t size, uint32_t timeout) {
-    ScopedLock lock(rx_mutex_);
     if (timeout == 0) {
-      if (!lock.lock(timeout)) {
+      if (osMutexAcquire(rx_mutex_, 0) != osOK) {
         return false;
       }
       uint16_t rx_write_idx;
-      if (xQueueReceive(rx_queue_, &rx_write_idx, timeout) == pdTRUE) {
-        rx_write_idx_ = rx_write_idx;
+      if (xQueueReceive(rx_queue_, &rx_write_idx, 0) == pdTRUE) {
+        rx_buf_tail_ = rx_write_idx;
       }
     } else {
       TimeOut_t timeout_state;
       vTaskSetTimeOutState(&timeout_state);
-      if (!lock.lock(timeout)) {
+      if (osMutexAcquire(rx_mutex_, timeout) != osOK) {
+        osMutexRelease(rx_mutex_);
         return false;
       }
       while (rx_buf_count() < size) {
@@ -65,24 +71,26 @@ public:
         }
         uint16_t rx_write_idx;
         if (xQueueReceive(rx_queue_, &rx_write_idx, timeout) == pdTRUE) {
-          rx_write_idx_ = rx_write_idx;
+          rx_buf_tail_ = rx_write_idx;
         }
       }
     }
 
     if (rx_buf_count() < size) {
+      osMutexRelease(rx_mutex_);
       return false;
     }
     for (size_t i = 0; i < size; ++i) {
-      if (rx_read_idx_ == rx_buf_.size()) {
-        rx_read_idx_ = 0;
+      if (rx_buf_head_ == rx_buf_.size()) {
+        rx_buf_head_ = 0;
       }
-      data[i] = rx_buf_[rx_read_idx_++];
+      data[i] = rx_buf_[rx_buf_head_++];
     }
+    osMutexRelease(rx_mutex_);
     return true;
   }
 
-  void flush() { rx_read_idx_ = rx_write_idx_; }
+  void flush() { rx_buf_head_ = rx_buf_tail_; }
 
   void enable_printf() { uart_printf_ = this; }
 
@@ -93,11 +101,11 @@ private:
   osSemaphoreId_t tx_sem_;
   QueueHandle_t rx_queue_;
   std::vector<uint8_t> rx_buf_;
-  uint16_t rx_read_idx_ = 0;
-  uint16_t rx_write_idx_ = 0;
+  uint16_t rx_buf_head_ = 0;
+  uint16_t rx_buf_tail_ = 0;
 
   size_t rx_buf_count() {
-    return (rx_buf_.size() + rx_write_idx_ - rx_read_idx_) % rx_buf_.size();
+    return (rx_buf_.size() + rx_buf_tail_ - rx_buf_head_) % rx_buf_.size();
   }
 
   static std::unordered_map<UART_HandleTypeDef *, UART *> instances_;

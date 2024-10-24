@@ -12,7 +12,9 @@ class Encoder {
 public:
   Encoder(TIM_HandleTypeDef *htim, uint16_t ppr, float period)
       : htim_(htim), ppr_(ppr), period_(period) {
-    HAL_TIM_Encoder_Start(htim_, TIM_CHANNEL_ALL);
+    if (HAL_TIM_Encoder_Start(htim_, TIM_CHANNEL_ALL) != HAL_OK) {
+      Error_Handler();
+    }
   }
 
   void update() {
