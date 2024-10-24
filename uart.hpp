@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-#ifndef HAL_UART_MODULE_ENABLED
+#ifdef HAL_UART_MODULE_ENABLED
 
 #include <cstddef>
 #include <cstdint>
