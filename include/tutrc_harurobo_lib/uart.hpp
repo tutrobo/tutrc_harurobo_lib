@@ -20,6 +20,17 @@ namespace tutrc_harurobo_lib {
 
 /**
  * UARTペリフェラルを扱うためのクラス
+ *
+ * @code{.cpp}
+ * tutrc_harurobo_lib::UART uart1(&huart1);
+ * uint8_t data[] = {'h', 'e', 'l', 'l', 'o'};
+ * if (!uart1.transmit(data, sizeof(data))) {
+ *   // 送信失敗
+ * }
+ * if (!uart1.receive(data, sizeof(data), 10)) {
+ *   // 受信失敗
+ * }
+ * @endcode
  */
 class UART {
 public:
