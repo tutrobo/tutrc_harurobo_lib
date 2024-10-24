@@ -77,27 +77,6 @@ bool FDCAN::transmit(uint32_t id, uint8_t *data, size_t size) {
   case 8:
     tx_header.DataLength = FDCAN_DLC_BYTES_8;
     break;
-  case 12:
-    tx_header.DataLength = FDCAN_DLC_BYTES_12;
-    break;
-  case 16:
-    tx_header.DataLength = FDCAN_DLC_BYTES_16;
-    break;
-  case 20:
-    tx_header.DataLength = FDCAN_DLC_BYTES_20;
-    break;
-  case 24:
-    tx_header.DataLength = FDCAN_DLC_BYTES_24;
-    break;
-  case 32:
-    tx_header.DataLength = FDCAN_DLC_BYTES_32;
-    break;
-  case 48:
-    tx_header.DataLength = FDCAN_DLC_BYTES_48;
-    break;
-  case 64:
-    tx_header.DataLength = FDCAN_DLC_BYTES_64;
-    break;
   default:
     return false;
   }
@@ -120,7 +99,7 @@ void FDCAN::set_rx_callback(
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
                                uint32_t RxFifo0ITs) {
   static FDCAN_RxHeaderTypeDef rx_header;
-  static std::array<uint8_t, 64> data;
+  static std::array<uint8_t, 8> data;
 
   if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rx_header, data.data()) ==
       HAL_OK) {
@@ -156,27 +135,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan,
           break;
         case FDCAN_DLC_BYTES_8:
           size = 8;
-          break;
-        case FDCAN_DLC_BYTES_12:
-          size = 12;
-          break;
-        case FDCAN_DLC_BYTES_16:
-          size = 16;
-          break;
-        case FDCAN_DLC_BYTES_20:
-          size = 20;
-          break;
-        case FDCAN_DLC_BYTES_24:
-          size = 24;
-          break;
-        case FDCAN_DLC_BYTES_32:
-          size = 32;
-          break;
-        case FDCAN_DLC_BYTES_48:
-          size = 48;
-          break;
-        case FDCAN_DLC_BYTES_64:
-          size = 64;
           break;
         default:
           return;
